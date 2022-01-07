@@ -7,7 +7,7 @@ class NewTasksScreen extends StatelessWidget {
       child: Text(
         'New Tasks ',
         style: TextStyle(
-        fontSize: 30.0,
+        fontSize: 25.0,
         fontWeight: FontWeight.bold,
 
       ),),
