@@ -1,6 +1,8 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:todoapp/modules/archived_tasks/archived_tasks_screen.dart';
+import 'package:todoapp/modules/done_tasks/done_tasks_screen.dart';
 import 'package:todoapp/modules/new_tasks/new_tasks_screen.dart';
 
 class HomeLayout extends StatefulWidget{
@@ -10,13 +12,23 @@ class HomeLayout extends StatefulWidget{
 
 class _HomeLayoutState extends State<HomeLayout> {
   int currentIndex=0;
+  List<Widget> screens=[
+    NewTasksScreen(),
+    DoneTasksScreen(),
+    ArchiveTasksScreen(),
+  ];
+  List<String>titles=[
+    'New Task',
+    'Done Task',
+    'Archived Task',
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('ToDO App'),
+        title: Text(titles[currentIndex]),
       ),
-      body: NewTasksScreen(),
+      body: screens[currentIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: (){},
         child:Icon(
