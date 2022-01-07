@@ -1,6 +1,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:todoapp/modules/new_tasks/new_tasks_screen.dart';
 
 class HomeLayout extends StatefulWidget{
   @override
@@ -15,6 +16,7 @@ class _HomeLayoutState extends State<HomeLayout> {
       appBar: AppBar(
         title: Text('ToDO App'),
       ),
+      body: NewTasksScreen(),
       floatingActionButton: FloatingActionButton(
         onPressed: (){},
         child:Icon(
