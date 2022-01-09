@@ -3,9 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:todoapp/components/components.dart';
+import 'package:todoapp/components/constants.dart';
 import 'package:todoapp/modules/archived_tasks/archived_tasks_screen.dart';
 import 'package:todoapp/modules/done_tasks/done_tasks_screen.dart';
 import 'package:todoapp/modules/new_tasks/new_tasks_screen.dart';
+import'package:intl/intl.dart';
 
 class HomeLayout extends StatefulWidget{
   @override
@@ -14,7 +16,11 @@ class HomeLayout extends StatefulWidget{
 
 class _HomeLayoutState extends State<HomeLayout> {
   var titleController=TextEditingController();
+  var dateController=TextEditingController();
+  var timeController=TextEditingController();
+  var statusController=TextEditingController();
   var scaffoldKey=GlobalKey<ScaffoldState>();
+  var formKey=GlobalKey<FormState>();
   bool isShow=false;
   IconData floatIcon=Icons.edit;
   Database ?database;
@@ -43,47 +49,108 @@ class _HomeLayoutState extends State<HomeLayout> {
       appBar: AppBar(
         title: Text(titles[currentIndex]),
       ),
-      body: screens[currentIndex],
+      body: tasks.length==0?Center(child: CircularProgressIndicator()):screens[currentIndex],
       floatingActionButton: FloatingActionButton(
+
         onPressed: (){
           if(isShow) {
-            Navigator.pop(context);
-            setState(() {
-              floatIcon=Icons.edit;
-            });
-          }
+
+            if(formKey.currentState!.validate()){
+
+              InsertToDatabase(title:titleController.text,date: dateController.text,time: timeController.text).then((value){
+                getDataFromDatabase(database!).then((value){
+                  Navigator.pop(context);
+                  setState(() {
+                    tasks=value;
+                    isShow=false;
+                    floatIcon=Icons.edit;
+                    titleController.text="";
+                    dateController.text="";
+                    timeController.text="";
+                  });
+
+              });
+          });}}
           else{
             setState(() {
               floatIcon=Icons.add;
             });
           scaffoldKey.currentState!.showBottomSheet((context)=>
             Container(
-              color: Colors.grey[200],
+              color: Colors.white,
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    defaultFormField(
-                        label: 'Task Title'
-                        , controller: titleController
-                        , type: TextInputType.text,
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      defaultFormField(
+                          label: 'Task Title'
+                          , controller: titleController
+                          , type: TextInputType.text,
+                          onValidateFunc: (value){
+                            if(value!.isEmpty) {
+                              return 'title must not be empty';
+                            }
+                            return null;
+                          },
+                          prefixIcon: Icons.title,
+                      ),
+                      SizedBox(height: 15,),
+                      defaultFormField(
+                        label: 'Task Date'
+                        , controller: dateController
+                        , type: TextInputType.datetime,
                         onValidateFunc: (value){
                           if(value!.isEmpty) {
-                            return 'title must not be empty';
+                            return 'Date must not be empty';
                           }
                           return null;
                         },
-                        prefixIcon: Icons.title,
-                    )
-                  ],
+                        prefixIcon: Icons.calendar_today,
+                        onTabFunc: (){
+                         showDatePicker(context: context, initialDate:DateTime.now() , firstDate:DateTime.now() , lastDate:DateTime.parse('2022-05-05')).then((value) {
+                           dateController.text=DateFormat.yMMMd().format(value!);
+                         });
+                        }
+                      ),
+                      SizedBox(height: 15.0,),
+                      defaultFormField(
+                          label: 'Task Time'
+                          , controller: timeController
+                          , type: TextInputType.datetime,
+                          onValidateFunc: (value){
+                            if(value!.isEmpty) {
+                              return 'Time must not be empty';
+                            }
+                            return null;
+                          },
+                          prefixIcon: Icons.watch_later_outlined,
+                          onTabFunc: (){
+                            showTimePicker(context: context, initialTime: TimeOfDay.now()).then((value) {
+                              timeController.text=value!.format(context);
+                            });
+                          }
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          );
+            elevation: 20.0,
 
+          ).closed.then((value){
+            isShow=false;
+            //Navigator.pop(context);
+            setState(() {
+              floatIcon=Icons.edit;
+
+            });
+          });
+            isShow=true;
         }
-          isShow=!isShow;
+
           },
         child:Icon(
           floatIcon,
@@ -129,12 +196,30 @@ class _HomeLayoutState extends State<HomeLayout> {
             print('Error ${onError.toString()}');
           });
       },
+      onOpen: (database){
+          getDataFromDatabase(database).then((value){
+            setState(() {
+              tasks=value;
+            });
+
+            //print(tasks);
+          });
+      }
     );
   }
-  void InsertToDatabase(){
-    database!.transaction((txn){
-      txn.rawInsert('insert into tasks (title,date,time,status) values ("first task", "2022","5 pm","not")').then((value){ print ('Inserted Successfuly');}).catchError((onError){print(onError.toString());});
+  Future InsertToDatabase({
+  required String title,
+    required String date,
+    required String time,
+})async
+  {
+    return await database!.transaction((txn){
+      txn.rawInsert('insert into tasks (title,date,time,status) values ("${title}", "${date}","${time}","new")').then((value){ print ('Inserted Successfuly');}).catchError((onError){print(onError.toString());});
       return null;
     });
+  }
+
+  Future<List<Map>> getDataFromDatabase(Database database)async{
+   return await database.rawQuery('select * from tasks');
   }
 }

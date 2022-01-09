@@ -1,4 +1,8 @@
+
+
 import 'package:flutter/material.dart';
+
+import 'constants.dart';
 
 Widget defaultButton({
   double width = double.infinity,
@@ -34,6 +38,7 @@ Widget defaultFormField({
   required IconData prefixIcon,
   IconData? suffixIcon,
   void Function()? suffixPressedFunc,
+  void Function()? onTabFunc,
 
 }) =>
     TextFormField(
@@ -54,4 +59,39 @@ Widget defaultFormField({
       onChanged: onChangedFunc,
       style: TextStyle(fontSize: 20.0, color: Colors.blue),
       validator: onValidateFunc,
+      onTap:onTabFunc ,
     );
+Widget BuildTaskItem(int index)
+=> Padding(
+    padding: const EdgeInsets.all(15.0),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        CircleAvatar(
+          radius: 40.0,
+          child: Text(tasks[index]['time'].toString()),
+        ),
+        SizedBox(width: 15.0,),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              tasks[index]['title'].toString(),
+              style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold
+              ),
+            ),
+            Text(
+              tasks[index]['date'].toString(),
+              style: TextStyle(
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w300
+              ),
+            ),
+          ],
+        )
+      ],
+    ),
+  );
