@@ -1,13 +1,22 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:todoapp/components/components.dart';
-import 'package:todoapp/components/constants.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todoapp/shared/components/components.dart';
+import 'package:todoapp/shared/components/constants.dart';
+import 'package:todoapp/shared/cubit/cubit.dart';
+import 'package:todoapp/shared/cubit/states.dart';
 
 class NewTasksScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(itemBuilder: (context,index)=>BuildTaskItem(index), separatorBuilder:(context,index)=>Container(width: double.infinity,height: 1.0,color: Colors.grey[300],), itemCount:tasks.length );
-  }
 
+    return BlocConsumer<AppCubit, AppStates>(
+        listener: (context, state)
+    {},
+    builder: (context,state){
+          AppCubit cubit = AppCubit.get(context);
+          return TaskBuilder(tasks: cubit.newTasks);
+      });
+  }
 }
